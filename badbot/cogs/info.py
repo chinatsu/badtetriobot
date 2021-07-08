@@ -64,7 +64,7 @@ class Info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="info", aliases=["stats"])
+    @commands.command(name="info", aliases=["stats", "정보"])
     async def info(self, ctx, tetrioname = None):
         """Shows info for a specified TETR.IO user.
         If no TETR.IO username is provided, it will try to use the calling user's nickname as TETR.IO username

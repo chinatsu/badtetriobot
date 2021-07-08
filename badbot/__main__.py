@@ -9,14 +9,14 @@ description = """
     """
 
 initial_extensions = [
-    "cogs.info",
-    "cogs.admin"
+    "cogs.admin",
+    "cogs.fortune"
 ]
 
 
 def _prefix_callable(bot, msg):
     user_id = bot.user.id
-    return [f"<@!{user_id}> ", f"<@{user_id}> ", "!"]
+    return [f"<@!{user_id}> ", f"<@{user_id}> ", "?"]
 
 
 class BadTetrioBot(commands.Bot):
