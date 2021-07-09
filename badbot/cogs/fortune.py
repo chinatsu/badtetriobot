@@ -12,7 +12,7 @@ class Fortune(commands.Cog):
     def get_seed(self, user_id):
         return datetime.now(timezone('Asia/Seoul')).date().toordinal() + user_id
 
-    @commands.command(name="fortune", aliases=["f", "운세"])
+    @commands.command(name="fortune", aliases=["f", "운세", "에프"])
     async def fortune(self, ctx):
         """오늘의 운세를 확인해보세요
         """
