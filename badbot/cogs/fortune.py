@@ -14,7 +14,7 @@ class Fortune(commands.Cog):
 
     @commands.command(name="fortune", aliases=["f", "운세"])
     async def fortune(self, ctx):
-        """Gives a personal fortune for the day
+        """오늘의 운세를 확인해보세요
         """
         member = ctx.author
         seed = self.get_seed(member.id)
