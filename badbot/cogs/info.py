@@ -28,6 +28,10 @@ def rank_to_emoji(rank):
     }
     return ranks[rank]
 
+TRANSPARENT = "<:transparent:881270184822857808>"
+SUPPORTER = "<:supporter:881270138740031528>"
+VERIFIED = "<:verified:881270163599687762>"
+
 def avatar_url(userid):
     return f"https://tetr.io/user-content/avatars/{userid}.jpg"
 
@@ -143,6 +147,32 @@ class Info(commands.Cog):
         result += "```"
         await ctx.send(result)
 
+
+    @commands.command()
+    async def top10(self, ctx):
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://ch.tetr.io/api/users/lists/league") as r:
+                js = await r.json()
+                data = js['data']['users']
+
+        data = data[:10]
+        length = len(max((user['username'] for user in data), key=len))
+
+        result = f"**TETR.IO Top 10 Leaderboard**\n"
+        result += f"`   {'name': <{length}} TR      ` {TRANSPARENT} {TRANSPARENT} {TRANSPARENT}`Wins          APM    PPS  VS   `\n"
+        for idx, user in enumerate(data):
+            league = user['league']
+            position = idx + 1
+            result += f"`{position: >2} {user['username']: <{length}} {league['rating']:.2f}` "
+            result += f"{flag.flag(user['country'])} " if user['country'] != None else TRANSPARENT
+            result += VERIFIED if user['verified'] else TRANSPARENT
+            result += SUPPORTER if 'supporter' in user else TRANSPARENT
+            result += f" `{user['league']['gameswon']}"
+            result += f" ({(user['league']['gameswon'] / user['league']['gamesplayed'] * 100):.2f}%)"
+            result += f"  {user['league']['apm']:.1f}  {user['league']['pps']:.1f}  {user['league']['vs']:.1f}`"
+            result += f"\n"
+
+        await ctx.send(result)
 
 def setup(bot):
     bot.add_cog(Info(bot))
