@@ -1,9 +1,8 @@
 from discord.ext import commands
 from discord import Embed
-import random
-from datetime import date
 import aiohttp
 import flag
+from datetime import datetime
 
 def rank_to_emoji(rank):
     ranks = {
@@ -69,9 +68,14 @@ def add_records(e, js):
         e.add_field(name="Solo Records", value="\n".join(solo_records), inline=True)
     return e
 
+def username(ctx, tetrioname = None):
+    target = tetrioname or ctx.author.nick
+    target = "".join([x.lower() for x in target if x in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890-_'])
+    return target
 
 class Info(commands.Cog):
     def __init__(self, bot):
+        self.api = Api.new()
         self.bot = bot
 
     @commands.command(name="info", aliases=["stats", "정보"])
@@ -79,8 +83,7 @@ class Info(commands.Cog):
         """Shows info for a specified TETR.IO user.
         If no TETR.IO username is provided, it will try to use the calling user's nickname as TETR.IO username
         """
-        target = tetrioname or ctx.author.nick
-        target = "".join([x.lower() for x in target if x in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890-_'])
+        target = username(ctx, tetrioname)
         async with aiohttp.ClientSession() as session:
             async with session.get(f"https://ch.tetr.io/api/users/{target}") as r:
                 if r.status == 200:
@@ -97,6 +100,47 @@ class Info(commands.Cog):
                     await ctx.send(f"Something bad happened :( (HTTP status {r.status}")
                     return
         await ctx.send(embed=embed)
-                    
+
+
+    @commands.command(name="match")
+    async def match(self, ctx, tetrioname = None):
+        target = username(ctx, tetrioname)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'https://ch.tetr.io/api/users/{target.lower()}') as r:
+                if r.status == 200:
+                    js = await r.json()
+                    userid = js['data']['user']['_id']
+                else:
+                    await ctx.send(f"Something bad happened :( (HTTP status {r.status}")
+                    return
+            async with session.get(f"https://ch.tetr.io/api/streams/league_userrecent_{userid}") as r:
+                if r.status == 200:
+                    js = await r.json()
+                    print(js['data'])
+                    data = js['data']['records']
+                else:
+                    await ctx.send(f"Something bad happened :( (HTTP status {r.status}")
+                    return
+
+        result = "```diff\n"
+
+        if (len(data) == 0):
+            result += "- No match records"
+        else:
+            length = len(max([game["endcontext"][0]['user']['username'] for game in data] + [game["endcontext"][1]['user']['username'] for game in data], key=len))
+            result = "**" + target.upper() + "'s last " + str(len(data)) + " match results**\n"
+            result += "```diff\n"
+            for game in data:
+                end = game['endcontext']
+                formatted_time = datetime.strptime(
+                    game['ts'], "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%Y-%m-%d / %H:%M:%S")
+                if (end[0]['user']['username'] == target.lower()):
+                    result += f"+ W {end[0]['user']['username']}   {end[0]['wins']} - {end[1]['wins']}   {end[1]['user']['username']: <{length}} {formatted_time}\n"
+                else:
+                    result += f"- L {end[1]['user']['username']}   {end[1]['wins']} - {end[0]['wins']}   {end[0]['user']['username']: <{length}} {formatted_time}\n"
+        result += "```"
+        await ctx.send(result)
+
+
 def setup(bot):
     bot.add_cog(Info(bot))
