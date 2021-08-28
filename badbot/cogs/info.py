@@ -148,8 +148,10 @@ class Info(commands.Cog):
         await ctx.send(result)
 
 
-    @commands.command()
+    @commands.command(name="top10")
     async def top10(self, ctx):
+        """Shows the current top 10 players from TETRA LEAGUE
+        """
         async with aiohttp.ClientSession() as session:
             async with session.get("https://ch.tetr.io/api/users/lists/league") as r:
                 js = await r.json()
