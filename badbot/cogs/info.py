@@ -25,6 +25,7 @@ def rank_to_emoji(rank):
         "d+": "<:rankDplus:845088230588284959>",
         "d": "<:rankD:845088198966640640>",
         "d-": "<:rankDminus:845105375015600138>",
+        "z": "<:unranked:845092197346443284>",
     }
     return ranks[rank]
 
@@ -34,14 +35,23 @@ def avatar_url(userid):
 def create_info_embed(js):
     user = js["data"]["user"]
     league = user['league']
-    country = flag.flag(user['country'])
-    e = Embed(title=f"{country} {user['username'].upper()}", url=f"https://ch.tetr.io/u/{user['username']}")
+    country = ""
+    if user['country']:
+        country = f"{flag.flag(user['country'])} "
+    e = Embed(title=f"{country}{user['username'].upper()}", url=f"https://ch.tetr.io/u/{user['username']}")
     e.set_thumbnail(url=avatar_url(user["_id"]))
     pps = league["pps"]
     apm = league["apm"]
     vs = league["vs"]
     gpm = vs*.6-apm
-    e.add_field(name="Tetra league", value=f"{rank_to_emoji(league['rank'])} {league['rating']:.2f} TR\n🌏 {league['standing']} / {flag.flag(user['country'])} {league['standing_local']}", inline=False)
+    league_info = f"{rank_to_emoji(league['rank'])} {league['rating']:.2f} TR"
+    if league['standing'] == -1:
+        pass
+    elif user["country"]:
+        league_info += f"\n🌏 {league['standing']} / {flag.flag(user['country'])} {league['standing_local']}"
+    else:
+        league_info += f"\n🌏 {league['standing']}"
+    e.add_field(name="Tetra league", value=league_info, inline=False)
     e.add_field(name="Stats", value=f"**PPS** {pps:.2f}\n**APM** {apm:.2f}\n**VS** {vs:.2f}\n**GPM** {gpm:.2f}", inline=True)
     return e
 
@@ -49,14 +59,14 @@ def add_records(e, js):
     solo_records = []
     if "data" in js and "records" in js["data"]:
         records = js["data"]["records"]
-        if "40l" in records:
+        if records["40l"]["record"]:
             sprint_record = records["40l"]["record"]["endcontext"]["finalTime"]/1000
             solo_records.append(f"**Sprint (40L)** {sprint_record:.3f}s")
-        if "blitz" in records:
+        if records["blitz"]["record"]:
             blitz_record = records["blitz"]["record"]["endcontext"]["score"]
             solo_records.append(f"**Blitz** {blitz_record}")
-
-    e.add_field(name="Solo Records", value="\n".join(solo_records), inline=True)
+    if len(solo_records) > 0:
+        e.add_field(name="Solo Records", value="\n".join(solo_records), inline=True)
     return e
 
 
@@ -70,6 +80,7 @@ class Info(commands.Cog):
         If no TETR.IO username is provided, it will try to use the calling user's nickname as TETR.IO username
         """
         target = tetrioname or ctx.author.nick
+        target = "".join([x.lower() for x in target if x in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890-_'])
         async with aiohttp.ClientSession() as session:
             async with session.get(f"https://ch.tetr.io/api/users/{target}") as r:
                 if r.status == 200:
