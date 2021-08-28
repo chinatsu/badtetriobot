@@ -75,7 +75,6 @@ def username(ctx, tetrioname = None):
 
 class Info(commands.Cog):
     def __init__(self, bot):
-        self.api = Api.new()
         self.bot = bot
 
     @commands.command(name="info", aliases=["stats", "정보"])
