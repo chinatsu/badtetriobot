@@ -103,6 +103,9 @@ class Info(commands.Cog):
 
     @commands.command(name="match")
     async def match(self, ctx, tetrioname = None):
+        """Shows the 10 last played TETRA LEAGUE matches for a specified TETR.IO user.
+        If no TETR.IO username is provided, it will try to use the calling user's nickname as TETR.IO username
+        """
         target = username(ctx, tetrioname)
         async with aiohttp.ClientSession() as session:
             async with session.get(f'https://ch.tetr.io/api/users/{target.lower()}') as r:
