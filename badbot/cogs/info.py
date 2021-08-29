@@ -3,6 +3,7 @@ from discord import Embed
 import aiohttp
 import flag
 from datetime import datetime
+import pytz
 
 def rank_to_emoji(rank):
     ranks = {
@@ -31,6 +32,12 @@ def rank_to_emoji(rank):
 TRANSPARENT = "<:transparent:881270184822857808>"
 SUPPORTER = "<:supporter:881270138740031528>"
 VERIFIED = "<:verified:881270163599687762>"
+
+def to_korean_time(ts):
+    dt = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S.%fZ")
+    tz = pytz.timezone('Asia/Seoul')
+    return dt.astimezone(tz)
+
 
 def avatar_url(userid):
     return f"https://tetr.io/user-content/avatars/{userid}.jpg"
@@ -122,7 +129,6 @@ class Info(commands.Cog):
             async with session.get(f"https://ch.tetr.io/api/streams/league_userrecent_{userid}") as r:
                 if r.status == 200:
                     js = await r.json()
-                    print(js['data'])
                     data = js['data']['records']
                 else:
                     await ctx.send(f"Something bad happened :( (HTTP status {r.status}")
@@ -138,8 +144,7 @@ class Info(commands.Cog):
             result += "```diff\n"
             for game in data:
                 end = game['endcontext']
-                formatted_time = datetime.strptime(
-                    game['ts'], "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%Y-%m-%d / %H:%M:%S")
+                formatted_time = to_korean_time(game['ts']).strftime("%Y-%m-%d / %H:%M:%S")
                 if (end[0]['user']['username'] == target.lower()):
                     result += f"+ W {end[0]['user']['username']}   {end[0]['wins']} - {end[1]['wins']}   {end[1]['user']['username']: <{length}} {formatted_time}\n"
                 else:
