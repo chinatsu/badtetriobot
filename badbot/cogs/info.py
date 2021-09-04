@@ -146,9 +146,9 @@ class Info(commands.Cog):
                 end = game['endcontext']
                 formatted_time = to_korean_time(game['ts']).strftime("%Y-%m-%d / %H:%M:%S")
                 if (end[0]['user']['username'] == target.lower()):
-                    result += f"+ W {end[0]['user']['username']}   {end[0]['wins']} - {end[1]['wins']}   {end[1]['user']['username']: <{length}} {formatted_time}\n"
+                    result += f"+ W {end[0]['user']['username']}   {end[0]['wins']} - {end[1]['wins']}   {end[1]['user']['username']: <{length}} {formatted_time} KST/UTC +9\n"
                 else:
-                    result += f"- L {end[1]['user']['username']}   {end[1]['wins']} - {end[0]['wins']}   {end[0]['user']['username']: <{length}} {formatted_time}\n"
+                    result += f"- L {end[1]['user']['username']}   {end[1]['wins']} - {end[0]['wins']}   {end[0]['user']['username']: <{length}} {formatted_time} KST/UTC +9\n"
         result += "```"
         await ctx.send(result)
 
