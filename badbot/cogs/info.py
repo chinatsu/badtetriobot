@@ -58,6 +58,7 @@ def create_info_embed(js):
     vs = league["vs"]
     gpm = vs*.6-apm
     app = apm/pps/60
+    atkp = apm/.6/vs*100
     league_info = f"{rank_to_emoji(league['rank'])} {league['rating']:.2f} TR"
     if league['standing'] == -1:
         pass
@@ -66,7 +67,7 @@ def create_info_embed(js):
     else:
         league_info += f"\n🌏 {league['standing']}"
     e.add_field(name="Tetra league", value=league_info, inline=False)
-    e.add_field(name="Stats", value=f"**PPS** {pps:.2f}\n**APM** {apm:.2f}\n**VS** {vs:.2f}\n**GPM** {gpm:.2f}\n**APP** {app:.2f}", inline=True)
+    e.add_field(name="Stats", value=f"**PPS** {pps:.2f}\n**APM** {apm:.2f} ({atkp:.2f}%)\n**VS** {vs:.2f}\n**GPM** {gpm:.2f}\n**APP** {app:.2f}", inline=True)
     e.set_footer(text=f"Registered {reg_date}")
     return e
 
