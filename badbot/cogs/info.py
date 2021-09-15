@@ -33,6 +33,8 @@ TRANSPARENT = "<:transparent:881270184822857808>"
 SUPPORTER = "<:supporter:881270138740031528>"
 VERIFIED = "<:verified:881270163599687762>"
 
+DATEFORMAT = "%Y-%m-%d / %H:%M:%S KST/UTC +9"
+
 def to_korean_time(ts):
     dt = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S.%fZ")
     tz = pytz.timezone('Asia/Seoul')
@@ -45,6 +47,7 @@ def avatar_url(userid):
 def create_info_embed(js):
     user = js["data"]["user"]
     league = user['league']
+    reg_date = to_korean_time(user["ts"]).strftime(DATEFORMAT)
     country = ""
     if user['country']:
         country = f"{flag.flag(user['country'])} "
@@ -54,6 +57,7 @@ def create_info_embed(js):
     apm = league["apm"]
     vs = league["vs"]
     gpm = vs*.6-apm
+    ppa = pps*60/apm
     league_info = f"{rank_to_emoji(league['rank'])} {league['rating']:.2f} TR"
     if league['standing'] == -1:
         pass
@@ -62,7 +66,8 @@ def create_info_embed(js):
     else:
         league_info += f"\n🌏 {league['standing']}"
     e.add_field(name="Tetra league", value=league_info, inline=False)
-    e.add_field(name="Stats", value=f"**PPS** {pps:.2f}\n**APM** {apm:.2f}\n**VS** {vs:.2f}\n**GPM** {gpm:.2f}", inline=True)
+    e.add_field(name="Stats", value=f"**PPS** {pps:.2f}\n**APM** {apm:.2f}\n**VS** {vs:.2f}\n**GPM** {gpm:.2f}\n**PPA** {ppa:.2f}", inline=True)
+    e.set_footer(text=f"Registered {reg_date}")
     return e
 
 def add_records(e, js):
@@ -144,11 +149,11 @@ class Info(commands.Cog):
             result += "```diff\n"
             for game in data:
                 end = game['endcontext']
-                formatted_time = to_korean_time(game['ts']).strftime("%Y-%m-%d / %H:%M:%S")
+                formatted_time = to_korean_time(game['ts']).strftime(DATEFORMAT)
                 if (end[0]['user']['username'] == target.lower()):
-                    result += f"+ W {end[0]['user']['username']}   {end[0]['wins']} - {end[1]['wins']}   {end[1]['user']['username']: <{length}} {formatted_time} KST/UTC +9\n"
+                    result += f"+ W {end[0]['user']['username']}   {end[0]['wins']} - {end[1]['wins']}   {end[1]['user']['username']: <{length}} {formatted_time}\n"
                 else:
-                    result += f"- L {end[1]['user']['username']}   {end[1]['wins']} - {end[0]['wins']}   {end[0]['user']['username']: <{length}} {formatted_time} KST/UTC +9\n"
+                    result += f"- L {end[1]['user']['username']}   {end[1]['wins']} - {end[0]['wins']}   {end[0]['user']['username']: <{length}} {formatted_time}\n"
         result += "```"
         await ctx.send(result)
 
@@ -166,6 +171,7 @@ class Info(commands.Cog):
         length = len(max((user['username'] for user in data), key=len))
 
         result = f"**TETR.IO Top 10 Leaderboard**\n"
+
         result += f"`   {'name': <{length}} TR      ` {TRANSPARENT} {TRANSPARENT} {TRANSPARENT}`Wins          APM    PPS  VS   `\n"
         for idx, user in enumerate(data):
             league = user['league']
