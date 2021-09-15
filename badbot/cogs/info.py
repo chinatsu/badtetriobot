@@ -57,7 +57,7 @@ def create_info_embed(js):
     apm = league["apm"]
     vs = league["vs"]
     gpm = vs*.6-apm
-    ppa = pps*60/apm
+    app = apm/pps/60
     league_info = f"{rank_to_emoji(league['rank'])} {league['rating']:.2f} TR"
     if league['standing'] == -1:
         pass
@@ -66,7 +66,7 @@ def create_info_embed(js):
     else:
         league_info += f"\n🌏 {league['standing']}"
     e.add_field(name="Tetra league", value=league_info, inline=False)
-    e.add_field(name="Stats", value=f"**PPS** {pps:.2f}\n**APM** {apm:.2f}\n**VS** {vs:.2f}\n**GPM** {gpm:.2f}\n**PPA** {ppa:.2f}", inline=True)
+    e.add_field(name="Stats", value=f"**PPS** {pps:.2f}\n**APM** {apm:.2f}\n**VS** {vs:.2f}\n**GPM** {gpm:.2f}\n**APP** {app:.2f}", inline=True)
     e.set_footer(text=f"Registered {reg_date}")
     return e
 
@@ -172,9 +172,14 @@ class Info(commands.Cog):
 
         result = f"**TETR.IO Top 10 Leaderboard**\n"
 
-        result += f"`   {'name': <{length}} TR      ` {TRANSPARENT} {TRANSPARENT} {TRANSPARENT}`Wins          APM    PPS  VS   `\n"
+        result += f"`   {'name': <{length}} TR      ` {TRANSPARENT} {TRANSPARENT} {TRANSPARENT}`Wins          APM    PPS  GPM   APP   VS   `\n"
         for idx, user in enumerate(data):
             league = user['league']
+            apm = league['apm']
+            pps = league['pps']
+            vs = league['vs']
+            app = apm/pps/60
+            gpm = vs*.6-apm
             position = idx + 1
             result += f"`{position: >2} {user['username']: <{length}} {league['rating']:.2f}` "
             result += f"{flag.flag(user['country'])} " if user['country'] != None else TRANSPARENT
@@ -182,7 +187,7 @@ class Info(commands.Cog):
             result += SUPPORTER if 'supporter' in user else TRANSPARENT
             result += f" `{user['league']['gameswon']}"
             result += f" ({(user['league']['gameswon'] / user['league']['gamesplayed'] * 100):.2f}%)"
-            result += f"  {user['league']['apm']:.1f}  {user['league']['pps']:.1f}  {user['league']['vs']:.1f}`"
+            result += f"  {apm:.1f}  {pps:.1f}  {gpm:.1f}  {app:.2f}  {vs:.1f}`"
             result += f"\n"
 
         await ctx.send(result)
