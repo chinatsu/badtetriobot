@@ -33,7 +33,7 @@ TRANSPARENT = "<:transparent:881270184822857808>"
 SUPPORTER = "<:supporter:881270138740031528>"
 VERIFIED = "<:verified:881270163599687762>"
 
-DATEFORMAT = "%Y-%m-%d / %H:%M:%S KST/UTC +9"
+DATEFORMAT = "%Y-%m-%d / %H:%M UTC +9"
 
 def to_korean_time(ts):
     dt = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -85,7 +85,7 @@ def add_records(e, js):
         e.add_field(name="Solo Records", value="\n".join(solo_records), inline=True)
     return e
 
-def username(ctx, tetrioname = None):
+def username(ctx, tetrioname = ""):
     target = tetrioname or ctx.author.nick
     target = "".join([x.lower() for x in target if x in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890-_'])
     return target
@@ -146,15 +146,25 @@ class Info(commands.Cog):
             result += "- No match records"
         else:
             length = len(max([game["endcontext"][0]['user']['username'] for game in data] + [game["endcontext"][1]['user']['username'] for game in data], key=len))
+            total_length = length + len(target) + 10
             result = "**" + target.upper() + "'s last " + str(len(data)) + " match results**\n"
             result += "```diff\n"
+            result += f"  {'Result': <{total_length}}APM     GPM     PPS    APP    ATK%    Time\n"
             for game in data:
                 end = game['endcontext']
+                user = 0 if (end[0]['user']['username'] == target.lower()) else 1
+                stats = end[user]["points"]
+                apm = stats["secondary"]
+                pps = stats["tertiary"]
+                vs = stats["extra"]["vs"]
+                gpm = vs*.6-apm
+                app = apm/pps/60
+                atkp = f"{apm/.6/vs*100:.2f}%"
                 formatted_time = to_korean_time(game['ts']).strftime(DATEFORMAT)
                 if (end[0]['user']['username'] == target.lower()):
-                    result += f"+ W {end[0]['user']['username']}   {end[0]['wins']} - {end[1]['wins']}   {end[1]['user']['username']: <{length}} {formatted_time}\n"
+                    result += f"+ W {end[0]['user']['username']} {end[0]['wins']} - {end[1]['wins']} {end[1]['user']['username']: <{length}} {apm:<7.2f} {gpm:<7.2f} {pps:<6.2f} {app:<6.2f} {atkp:<7} {formatted_time}\n"
                 else:
-                    result += f"- L {end[1]['user']['username']}   {end[1]['wins']} - {end[0]['wins']}   {end[0]['user']['username']: <{length}} {formatted_time}\n"
+                    result += f"- L {end[1]['user']['username']} {end[1]['wins']} - {end[0]['wins']} {end[0]['user']['username']: <{length}} {apm:<7.2f} {gpm:<7.2f} {pps:<6.2f} {app:<6.2f} {atkp:<7} {formatted_time}\n"
         result += "```"
         await ctx.send(result)
 
