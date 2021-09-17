@@ -158,7 +158,7 @@ class Info(commands.Cog):
                 pps = stats["tertiary"]
                 vs = stats["extra"]["vs"]
                 gpm = vs*.6-apm
-                app = apm/pps/60
+                app = apm/pps/60 if pps else 0.0
                 atkp = f"{apm/.6/vs*100:.2f}%"
                 formatted_time = to_korean_time(game['ts']).strftime(DATEFORMAT)
                 if (end[0]['user']['username'] == target.lower()):
