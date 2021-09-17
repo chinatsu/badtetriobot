@@ -159,7 +159,7 @@ class Info(commands.Cog):
                 vs = stats["extra"]["vs"]
                 gpm = vs*.6-apm
                 app = apm/pps/60 if pps else 0.0
-                atkp = f"{apm/.6/vs*100:.2f}%"
+                atkp = f"{apm/.6/vs*100:.2f}%" if vs else "0.00%"
                 formatted_time = to_korean_time(game['ts']).strftime(DATEFORMAT)
                 if (end[0]['user']['username'] == target.lower()):
                     result += f"+ W {end[0]['user']['username']} {end[0]['wins']} - {end[1]['wins']} {end[1]['user']['username']: <{length}} {apm:<7.2f} {gpm:<7.2f} {pps:<6.2f} {app:<6.2f} {atkp:<7} {formatted_time}\n"
