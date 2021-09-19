@@ -138,3 +138,4 @@ dmypy.json
 cython_debug/
 
 secret.py
+**/scripts/*.json
