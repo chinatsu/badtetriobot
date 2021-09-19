@@ -4,6 +4,8 @@ import aiohttp
 import flag
 from datetime import datetime
 import pytz
+import os
+import json
 
 def rank_to_emoji(rank):
     ranks = {
@@ -25,6 +27,30 @@ def rank_to_emoji(rank):
         "d+": "<:rankDplus:845088230588284959>",
         "d": "<:rankD:845088198966640640>",
         "d-": "<:rankDminus:845105375015600138>",
+        "z": "<:unranked:845092197346443284>",
+    }
+    return ranks[rank]
+
+def thresholds_rank_to_emoji(rank):
+    ranks = {
+        "x": "<:rankX:845092185052413952>",
+        "u": "<:rankU:845092171438882866>",
+        "ss": "<:rankSS:845092157139976192>",
+        "sp": "<:rankSplus:845092140471418900>",
+        "s": "<:rankS:845092120662376478>",
+        "sm": "<:rankSminus:845092009101230080>",
+        "ap": "<:rankAplus:845091973248581672>",
+        "a": "<:rankA:845091931994587166>",
+        "am": "<:rankAminus:845091885286424596>",
+        "bp": "<:rankBplus:845091818911301634>",
+        "b": "<:rankB:845089923089825812>",
+        "bm": "<:rankBminus:845089882698154044>",
+        "cp": "<:rankCplus:845088318509285416>",
+        "c": "<:rankC:845088262611533844>",
+        "cm": "<:rankCminus:845088252322775041>",
+        "dp": "<:rankDplus:845088230588284959>",
+        "d": "<:rankD:845088198966640640>",
+        "dm": "<:rankDminus:845105375015600138>",
         "z": "<:unranked:845092197346443284>",
     }
     return ranks[rank]
@@ -85,6 +111,17 @@ def add_records(e, js):
         e.add_field(name="Solo Records", value="\n".join(solo_records), inline=True)
     return e
 
+def ranks_to_embed(ranks):
+    updated = datetime.strptime(ranks["date"], "%Y-%m-%d %H:%M:%S UTC").astimezone(pytz.timezone('Asia/Seoul')).strftime(DATEFORMAT)
+    e = Embed(title=f"Rank requirements")
+    e.set_footer(text=f"Last updated {updated}")
+    description = []
+    for rank in ranks["thresholds"]:
+        emoji = thresholds_rank_to_emoji(rank["rank"])
+        description.append(f"{emoji} **{rank['threshold']}TR** ({rank['percentage']}% / {rank['playerCount']} players)")
+    e.description = "\n".join(description)
+    return e
+
 def username(ctx, tetrioname = ""):
     target = tetrioname or ctx.author.nick
     target = "".join([x.lower() for x in target if x in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890-_'])
@@ -93,6 +130,23 @@ def username(ctx, tetrioname = ""):
 class Info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command(name="ranks", aliases=["rank"])
+    async def ranks(self, ctx, rank=None):
+        """Shows info of TR requirements for each rank. One can optionally specify a rank to only view that."""
+        if os.path.exists("badbot/scripts/thresholds.json"):
+            with open("badbot/scripts/thresholds.json", 'r') as f:
+                data = json.load(f)
+                if rank:
+                    targets = []
+                    target_ranks = rank.lower().replace('+', 'p').replace('-', 'm').split(",")
+                    for rank in data['thresholds']:
+                        if rank['rank'] in target_ranks:
+                            targets.append(rank)
+                    data["thresholds"] = targets
+            await ctx.send(embed=ranks_to_embed(data))
+        else:
+            await ctx.send("Rank data hasn't been received yet :(")
 
     @commands.command(name="info", aliases=["stats", "정보"])
     async def info(self, ctx, tetrioname = None):
