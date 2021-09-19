@@ -10,7 +10,8 @@ description = """
 
 initial_extensions = [
     "cogs.admin",
-    "cogs.info"
+    "cogs.info",
+    "cogs.ranks"
 ]
 
 
