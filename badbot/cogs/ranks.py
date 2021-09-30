@@ -39,7 +39,7 @@ def rank_to_emoji(rank):
 
 def ranks_to_embed(ranks):
     updated = datetime.strptime(ranks["date"], "%Y-%m-%d %H:%M:%S UTC").astimezone(pytz.timezone('Asia/Seoul')).strftime(DATEFORMAT)
-    e = Embed(title=f"Rank requirements")
+    e = Embed(title=f"랭크 요구치")
     e.set_footer(text=f"Last updated {updated}")
     description = []
     for rank in ranks["thresholds"]:
