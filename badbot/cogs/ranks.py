@@ -39,12 +39,12 @@ def rank_to_emoji(rank):
 
 def ranks_to_embed(ranks):
     updated = datetime.strptime(ranks["date"], "%Y-%m-%d %H:%M:%S UTC").astimezone(pytz.timezone('Asia/Seoul')).strftime(DATEFORMAT)
-    e = Embed(title=f"랭크 요구치")
+    e = Embed(title=f"랭크 등급컷")
     e.set_footer(text=f"마지막 업데이트 {updated}")
     description = []
     for rank in ranks["thresholds"]:
         emoji = rank_to_emoji(rank["rank"])
-        description.append(f"{emoji} **{rank['threshold']}TR** ({rank['percentage']}% / {rank['playerCount']} players)")
+        description.append(f"{emoji} **{rank['threshold']}TR** ({rank['percentage']}% / {rank['playerCount']} 유저)")
     e.description = "\n".join(description)
     return e
 
