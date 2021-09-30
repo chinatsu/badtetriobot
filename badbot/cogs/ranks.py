@@ -40,7 +40,7 @@ def rank_to_emoji(rank):
 def ranks_to_embed(ranks):
     updated = datetime.strptime(ranks["date"], "%Y-%m-%d %H:%M:%S UTC").astimezone(pytz.timezone('Asia/Seoul')).strftime(DATEFORMAT)
     e = Embed(title=f"랭크 요구치")
-    e.set_footer(text=f"Last updated {updated}")
+    e.set_footer(text=f"마지막 업데이트 {updated}")
     description = []
     for rank in ranks["thresholds"]:
         emoji = rank_to_emoji(rank["rank"])
@@ -60,7 +60,8 @@ class Ranks(commands.Cog):
 
     @commands.command(name="ranks", aliases=["rank", "랭크컷", "랭크"])
     async def ranks(self, ctx, * rank):
-        """Shows info of TR requirements for each rank. One can optionally specify a rank to only view that."""
+        """Shows info of TR requirements for each rank. Specify a rank to only show that.
+        Example: ?랭크 x 와 u"""
         if os.path.exists("badbot/scripts/thresholds.json"):
             with open("badbot/scripts/thresholds.json", 'r') as f:
                 data = json.load(f)

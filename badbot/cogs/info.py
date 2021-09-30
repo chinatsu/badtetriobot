@@ -66,9 +66,9 @@ def create_info_embed(js):
         league_info += f"\n🌏 {league['standing']} / {flag.flag(user['country'])} {league['standing_local']}"
     else:
         league_info += f"\n🌏 {league['standing']}"
-    e.add_field(name="Tetra league", value=league_info, inline=False)
-    e.add_field(name="Stats", value=f"**PPS** {pps:.2f}\n**APM** {apm:.2f} ({atkp:.2f}%)\n**VS** {vs:.2f}\n**GPM** {gpm:.2f}\n**APP** {app:.2f}", inline=True)
-    e.set_footer(text=f"Registered {reg_date}")
+    e.add_field(name="테트라 리그", value=league_info, inline=False)
+    e.add_field(name="스탯", value=f"**PPS** {pps:.2f}\n**APM** {apm:.2f} ({atkp:.2f}%)\n**VS** {vs:.2f}\n**GPM** {gpm:.2f}\n**APP** {app:.2f}", inline=True)
+    e.set_footer(text=f"시작한 날 {reg_date}")
     return e
 
 def add_records(e, js):
@@ -82,18 +82,7 @@ def add_records(e, js):
             blitz_record = records["blitz"]["record"]["endcontext"]["score"]
             solo_records.append(f"**Blitz** {blitz_record}")
     if len(solo_records) > 0:
-        e.add_field(name="Solo Records", value="\n".join(solo_records), inline=True)
-    return e
-
-def ranks_to_embed(ranks):
-    updated = datetime.strptime(ranks["date"], "%Y-%m-%d %H:%M:%S UTC").astimezone(pytz.timezone('Asia/Seoul')).strftime(DATEFORMAT)
-    e = Embed(title=f"Rank requirements")
-    e.set_footer(text=f"Last updated {updated}")
-    description = []
-    for rank in ranks["thresholds"]:
-        emoji = thresholds_rank_to_emoji(rank["rank"])
-        description.append(f"{emoji} **{rank['threshold']}TR** ({rank['percentage']}% / {rank['playerCount']} players)")
-    e.description = "\n".join(description)
+        e.add_field(name="기록", value="\n".join(solo_records), inline=True)
     return e
 
 def username(ctx, tetrioname = ""):
@@ -105,12 +94,10 @@ class Info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-
-
     @commands.command(name="info", aliases=["stats", "정보"])
     async def info(self, ctx, tetrioname = None):
         """Shows info for a specified TETR.IO user.
-        If no TETR.IO username is provided, it will try to use the calling user's nickname as TETR.IO username
+        If no TETR.IO username is provided, it will try to use your nickname as TETR.IO username.
         """
         target = username(ctx, tetrioname)
         async with aiohttp.ClientSession() as session:
@@ -156,13 +143,13 @@ class Info(commands.Cog):
         result = "```diff\n"
 
         if (len(data) == 0):
-            result += "- No match records"
+            result += "- 게임 기록 없음"
         else:
             length = len(max([game["endcontext"][0]['user']['username'] for game in data] + [game["endcontext"][1]['user']['username'] for game in data], key=len))
-            total_length = length + len(target) + 10
-            result = "**" + target.upper() + "'s last " + str(len(data)) + " match results**\n"
+            total_length = length + len(target) + 3
+            result = "**" + target.upper() + "의 최근 " + str(len(data)) + " 게임 결과**\n"
             result += "```diff\n"
-            result += f"  {'Result': <{total_length}}APM     GPM     PPS    APP    ATK%    Time\n"
+            result += f"  {'결과': <{total_length}}　　　APM     GPM     PPS    APP    공격비율　　　시각\n"
             for game in data:
                 end = game['endcontext']
                 user = 0 if (end[0]['user']['username'] == target.lower()) else 1
@@ -175,9 +162,9 @@ class Info(commands.Cog):
                 atkp = f"{apm/.6/vs*100:.2f}%" if vs else "0.00%"
                 formatted_time = to_korean_time(game['ts']).strftime(DATEFORMAT)
                 if (end[0]['user']['username'] == target.lower()):
-                    result += f"+ W {end[0]['user']['username']} {end[0]['wins']} - {end[1]['wins']} {end[1]['user']['username']: <{length}} {apm:<7.2f} {gpm:<7.2f} {pps:<6.2f} {app:<6.2f} {atkp:<7} {formatted_time}\n"
+                    result += f"+ W {end[0]['user']['username']} {end[0]['wins']} - {end[1]['wins']} {end[1]['user']['username']: <{length}} {apm:<7.2f} {gpm:<7.2f} {pps:<6.2f} {app:<6.2f} {atkp:<7}      {formatted_time}\n"
                 else:
-                    result += f"- L {end[1]['user']['username']} {end[1]['wins']} - {end[0]['wins']} {end[0]['user']['username']: <{length}} {apm:<7.2f} {gpm:<7.2f} {pps:<6.2f} {app:<6.2f} {atkp:<7} {formatted_time}\n"
+                    result += f"- L {end[1]['user']['username']} {end[1]['wins']} - {end[0]['wins']} {end[0]['user']['username']: <{length}} {apm:<7.2f} {gpm:<7.2f} {pps:<6.2f} {app:<6.2f} {atkp:<7}      {formatted_time}\n"
         result += "```"
         await ctx.send(result)
 
