@@ -48,7 +48,7 @@ def create_info_embed(js):
     user = js["data"]["user"]
     league = user['league']
     reg_date = to_korean_time(user["ts"]).strftime(DATEFORMAT)
-    ts = int(datetime.now().timestamp())
+    ts = datetime.now().date().toordinal()
     country = ""
     if user['country']:
         country = f"{flag.flag(user['country'])} "
