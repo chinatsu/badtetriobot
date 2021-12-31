@@ -48,11 +48,12 @@ def create_info_embed(js):
     user = js["data"]["user"]
     league = user['league']
     reg_date = to_korean_time(user["ts"]).strftime(DATEFORMAT)
+    ts = int(datetime.now().timestamp())
     country = ""
     if user['country']:
         country = f"{flag.flag(user['country'])} "
     e = Embed(title=f"{country}{user['username'].upper()}", url=f"https://ch.tetr.io/u/{user['username']}")
-    e.set_thumbnail(url=avatar_url(user["_id"]))
+    e.set_thumbnail(url=f"{avatar_url(user['_id'])}?ts={ts}")
     pps = league["pps"]
     apm = league["apm"]
     vs = league["vs"]

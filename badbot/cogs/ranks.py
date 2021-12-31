@@ -18,21 +18,21 @@ def rank_to_emoji(rank):
         "x": "<:rankX:845092185052413952>",
         "u": "<:rankU:845092171438882866>",
         "ss": "<:rankSS:845092157139976192>",
-        "sp": "<:rankSplus:845092140471418900>",
+        "s+": "<:rankSplus:845092140471418900>",
         "s": "<:rankS:845092120662376478>",
-        "sm": "<:rankSminus:845092009101230080>",
-        "ap": "<:rankAplus:845091973248581672>",
+        "s-": "<:rankSminus:845092009101230080>",
+        "a+": "<:rankAplus:845091973248581672>",
         "a": "<:rankA:845091931994587166>",
-        "am": "<:rankAminus:845091885286424596>",
-        "bp": "<:rankBplus:845091818911301634>",
+        "a-": "<:rankAminus:845091885286424596>",
+        "b+": "<:rankBplus:845091818911301634>",
         "b": "<:rankB:845089923089825812>",
-        "bm": "<:rankBminus:845089882698154044>",
-        "cp": "<:rankCplus:845088318509285416>",
+        "b-": "<:rankBminus:845089882698154044>",
+        "c+": "<:rankCplus:845088318509285416>",
         "c": "<:rankC:845088262611533844>",
-        "cm": "<:rankCminus:845088252322775041>",
-        "dp": "<:rankDplus:845088230588284959>",
+        "c-": "<:rankCminus:845088252322775041>",
+        "d+": "<:rankDplus:845088230588284959>",
         "d": "<:rankD:845088198966640640>",
-        "dm": "<:rankDminus:845105375015600138>",
+        "d-": "<:rankDminus:845105375015600138>",
         "z": "<:unranked:845092197346443284>",
     }
     return ranks[rank]
@@ -44,7 +44,7 @@ def ranks_to_embed(ranks):
     description = []
     for rank in ranks["thresholds"]:
         emoji = rank_to_emoji(rank["rank"])
-        description.append(f"{emoji} **{rank['threshold']}TR** ({rank['percentage']}% / {rank['playerCount']} 유저)")
+        description.append(f"{emoji} **{rank['threshold']:.2f}TR** ({rank['percentage']}% / {rank['playerCount']} 유저)")
     e.description = "\n".join(description)
     return e
 
@@ -67,7 +67,7 @@ class Ranks(commands.Cog):
                 data = json.load(f)
                 if len(rank) > 0:
                     targets = []
-                    target_ranks = self.split_choices("|".join(rank).lower().replace('+', 'p').replace('-', 'm'))
+                    target_ranks = self.split_choices("|".join(rank).lower())
                     for rank in data['thresholds']:
                         if rank['rank'] in target_ranks:
                             targets.append(rank)
