@@ -6,6 +6,29 @@ import time
 
 THRESHOLD_FILE = "thresholds.json"
 
+def team2xh_rank_to_rank(rank):
+    ranks = {
+        "x": "x",
+        "u": "u",
+        "ss": "ss",
+        "sp": "s+",
+        "s": "s",
+        "sm": "s-",
+        "ap": "a+",
+        "a": "a",
+        "am": "a-",
+        "bp": "b+",
+        "b": "b",
+        "bm": "b-",
+        "cp": "c+",
+        "c": "c",
+        "cm": "c-",
+        "dp": "d+",
+        "d": "d",
+        "dm": "d-",
+    }
+    return ranks[rank]
+
 def fetch_complete_leaderboard():
     resp = requests.get("https://ch.tetr.io/api/users/lists/league/all")
     if resp.status_code == 200:
@@ -52,6 +75,8 @@ def download_threshold_data():
     if resp.status_code == 200:
         js = resp.json()
         relevant_data = dict(date=js['date'], thresholds=js['thresholds'])
+        for i,e in enumerate(relevant_data["thresholds"]):
+            relevant_data["thresholds"][i]["rank"] = team2xh_rank_to_rank(e["rank"])
         with open(THRESHOLD_FILE, 'w') as f:
            json.dump(relevant_data, f)
         print(f"Updated @ {datetime.now()}")
