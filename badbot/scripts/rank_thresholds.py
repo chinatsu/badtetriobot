@@ -55,12 +55,16 @@ def download_threshold_data():
         with open(THRESHOLD_FILE, 'w') as f:
            json.dump(relevant_data, f)
         print(f"Updated @ {datetime.now()}")
+        return True
     else:
-        print(f"Ran into issues? Status code: {resp.status_code}")
+        print(f"Ran into issues with team2xh? Status code: {resp.status_code}")
+        return False
 
 if __name__ == '__main__':
     while True:
-        data = fetch_complete_leaderboard()
-        buckets = sort_players_into_buckets(data)
-        write_data_from_buckets(buckets)
+        team2xh = download_threshold_data()
+        if not team2xh:
+            data = fetch_complete_leaderboard()
+            buckets = sort_players_into_buckets(data)
+            write_data_from_buckets(buckets)
         time.sleep(5*60)
