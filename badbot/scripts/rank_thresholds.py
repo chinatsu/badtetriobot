@@ -47,7 +47,7 @@ def write_data_from_buckets(data):
 
 def download_threshold_data():
     if path.exists(THRESHOLD_FILE) and datetime.now() - datetime.fromtimestamp(path.getmtime(THRESHOLD_FILE)) < timedelta(hours=1):
-        return
+        return True
     resp = requests.get("https://tetrio.team2xh.net/data/thresholds.js")
     if resp.status_code == 200:
         js = resp.json()
