@@ -87,7 +87,7 @@ def add_records(e, js):
     return e
 
 def username(ctx, tetrioname = ""):
-    target = tetrioname or ctx.author.nick
+    target = tetrioname or ctx.author.display_name
     target = "".join([x.lower() for x in target if x in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890-_'])
     return target
 
