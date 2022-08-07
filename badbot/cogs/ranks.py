@@ -37,6 +37,33 @@ def rank_to_emoji(rank):
     }
     return ranks[rank]
 
+
+def kr_rank_to_rank(rank):
+    ranks = {
+        "엑스": "x",
+        "유": "u",
+        "에스에스": "ss",
+        "에스플러스": "s+",
+        "에스": "s",
+        "에스마이너스": "s-",
+        "에이플러스": "a+",
+        "에이": "a",
+        "에이마이너스": "a-",
+        "비플러스": "b+",
+        "비": "b",
+        "비마이너스": "b-",
+        "씨플러스": "c+",
+        "씨": "c",
+        "씨마이너스": "c-",
+        "디플러스": "d+",
+        "디": "d",
+        "디마이너스": "d-"
+    }
+    try:
+        return ranks[rank]
+    except:
+        return rank
+
 def ranks_to_embed(ranks):
     updated = datetime.strptime(ranks["date"], "%Y-%m-%d %H:%M:%S UTC").astimezone(pytz.timezone('Asia/Seoul')).strftime(DATEFORMAT)
     e = Embed(title=f"랭크 등급컷")
@@ -67,7 +94,7 @@ class Ranks(commands.Cog):
                 data = json.load(f)
                 if len(rank) > 0:
                     targets = []
-                    target_ranks = self.split_choices("|".join(rank).lower())
+                    target_ranks = [kr_rank_to_rank(x) for x in self.split_choices("|".join(rank).lower())]
                     for rank in data['thresholds']:
                         if rank['rank'] in target_ranks:
                             targets.append(rank)
